@@ -185,7 +185,21 @@
     }{}%
   }\kern.12em}
 \newcommand{\CoverField}[1]{\rule[-3.5mm]{0pt}{9.2mm}#1}
+% 与封面勾选使用同一类型；未选择类型时保留原始通用表单。
+\newcommand{\ProposalCoverTitleLabel}{%
+  \ifdefstring{\ProposalType}{thesis}{论文题目}{%
+    \ifdefstring{\ProposalType}{practice}{实践成果名称}{论文题目/实践成果名称}}}
+\newlength{\ProposalCoverLabelWidth}
+\newlength{\ProposalCoverFieldWidth}
+\newcommand{\ProposalSetupCoverFields}{%
+  \setlength{\ProposalCoverLabelWidth}{4.95cm}%
+  \setlength{\ProposalCoverFieldWidth}{8.25cm}%
+  \ifdefempty{\ProposalType}{}{%
+    \setlength{\ProposalCoverLabelWidth}{3cm}%
+    % cline 另含 1.5 mm 列内留白，实际横线约 9.5 cm，与参考模板接近。
+    \setlength{\ProposalCoverFieldWidth}{9.35cm}}}
 \newcommand{\makeproposalcover}{%
+  \ProposalSetupCoverFields
   \ifProposalReport\makeproposalreportcover\else\makeproposaltemplatecover\fi}
 \newcommand{\makeproposaltemplatecover}{%
   \begin{titlepage}
@@ -203,15 +217,15 @@
   {\ProposalKai\fontsize{12bp}{15.6bp}\selectfont
   \setlength{\tabcolsep}{1.5mm}
   \setlength{\arrayrulewidth}{.5pt}
-  \begin{tabular}{@{}>{\raggedright\arraybackslash}m{4.95cm}
-                       >{\raggedright\arraybackslash}m{8.25cm}@{}}
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}m{\ProposalCoverLabelWidth}
+                       >{\raggedright\arraybackslash}m{\ProposalCoverFieldWidth}@{}}
     姓名 & \CoverField{\StudentName}\\\cline{2-2}
     学号 & \CoverField{\StudentID}\\\cline{2-2}
     开题类型 & \CoverField{\ProposalCheck{thesis}学位论文\quad
                           \ProposalCheck{practice}实践成果}\\\cline{2-2}
     导师组 & \CoverField{组长：\AdvisorLeader}\par
               \CoverField{组员：\AdvisorMembers}\\\cline{2-2}
-    论文题目/实践成果名称 & \CoverField{\ProposalTitle}\\\cline{2-2}
+    \ProposalCoverTitleLabel & \CoverField{\ProposalTitle}\\\cline{2-2}
     专业/领域 & \CoverField{\MajorField}\\\cline{2-2}
   \end{tabular}\par
   \vspace{27mm}
@@ -231,8 +245,8 @@
   \vspace{10mm}%
   {\ProposalKai\fontsize{13bp}{18bp}\selectfont
     \setlength{\tabcolsep}{1.5mm}\setlength{\arrayrulewidth}{.5pt}%
-    \begin{tabular}{@{}>{\raggedright\arraybackslash}m{4.95cm}
-                         >{\centering\arraybackslash}m{8.25cm}@{}}
+    \begin{tabular}{@{}>{\raggedright\arraybackslash}m{\ProposalCoverLabelWidth}
+                         >{\centering\arraybackslash}m{\ProposalCoverFieldWidth}@{}}
       姓名 & \ProposalReportCoverField{\StudentName}\\\cline{2-2}
       学号 & \ProposalReportCoverField{\StudentID}\\\cline{2-2}
       开题类型 & \ProposalReportCoverField{\ProposalCheck{thesis}学位论文\quad
@@ -240,7 +254,7 @@
       导师组 & {\raggedright
         \ProposalReportCoverField{组长：\AdvisorLeader}\par
         \ProposalReportCoverField{组员：\AdvisorMembers}\par}\\\cline{2-2}
-      论文题目/实践成果名称 & \ProposalReportCoverField{\ProposalTitle}\\\cline{2-2}
+      \ProposalCoverTitleLabel & \ProposalReportCoverField{\ProposalTitle}\\\cline{2-2}
       专业/领域 & \ProposalReportCoverField{\MajorField}\\\cline{2-2}
     \end{tabular}\par
     \vspace{25mm}%
