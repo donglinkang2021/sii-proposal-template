@@ -1,0 +1,32 @@
+{
+    "latex-workshop.latex.recipe.default": "xelatex-latexmk",
+    "latex-workshop.latex.outDir": "output",
+    "latex-workshop.latex.auxDir": "%OUTDIR%",
+    "latex-workshop.view.pdf.viewer": "tab",
+    "latex-workshop.latex.search.rootFiles.exclude": [
+        "**/output/**",
+        "**/build/**",
+        "**/tmp/**"
+    ],
+    "files.exclude": {
+        "build": true,
+        "tmp": true,
+        "output/**/*.aux": true,
+        "output/**/*.fdb_latexmk": true,
+        "output/**/*.fls": true,
+        "output/**/*.log": true,
+        "output/**/*.out": true,
+        "output/**/*.synctex.gz": true,
+        "output/**/*.xdv": true,
+        "output/**/*.toc": true,
+        "output/**/*.bbl": true,
+        "output/**/*.blg": true,
+        "output/**/*.bcf": true,
+        "output/**/*.run.xml": true
+    },
+    "search.exclude": {
+        "output": true,
+        "build": true,
+        "tmp": true
+    }
+}

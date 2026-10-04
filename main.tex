@@ -1,0 +1,16 @@
+% !TeX root = main.tex
+% Build with the project's xelatex-latexmk recipe (.vscode/settings.json).
+\documentclass[UTF8,fontset=none,zihao=-4]{ctexart}
+\usepackage{sii-proposal}
+\input{metadata}
+
+\begin{document}
+\makeproposalcover
+\input{sections/instructions}
+\ifboolexpr{test {\ifdefstring{\ProposalMode}{all}} or
+            test {\ifdefstring{\ProposalMode}{thesis}}}
+  {\input{sections/thesis}}{}
+\ifboolexpr{test {\ifdefstring{\ProposalMode}{all}} or
+            test {\ifdefstring{\ProposalMode}{practice}}}
+  {\input{sections/practice}}{}
+\end{document}

@@ -1,0 +1,146 @@
+% !TeX root = main.tex
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{sii-proposal}[2026/10/04 SII doctoral proposal]
+\RequirePackage{iftex}
+\RequireXeTeX
+\RequirePackage[a4paper,top=2.54cm,bottom=2.54cm,left=3.175cm,right=3.175cm]{geometry}
+\RequirePackage{fontspec}
+\RequirePackage{graphicx}
+\RequirePackage{array,tabularx}
+\RequirePackage{etoolbox}
+\RequirePackage{needspace}
+\RequirePackage[breakable,skins]{tcolorbox}
+\RequirePackage[hidelinks,unicode,hypertexnames=false]{hyperref}
+
+% 优先使用原稿字体；在其他电脑上依次尝试 macOS 和 TeX Live 字体。
+% 不将商业字体复制进项目。日志会明确记录采用的字体。
+\IfFontExistsTF{Times New Roman}
+  {\setmainfont{Times New Roman}}
+  {\setmainfont{TeX Gyre Termes}}
+\IfFontExistsTF{SimSun}{
+  \setCJKmainfont[AutoFakeBold=2.5]{SimSun}
+  \typeout{SII Song font: SimSun}
+}{\IfFontExistsTF{Songti SC}{
+  \setCJKmainfont[BoldFont=Songti SC Bold]{Songti SC}
+  \typeout{SII Song font: Songti SC (SimSun unavailable)}
+}{
+  \setCJKmainfont[BoldFont=FandolSong-Bold]{FandolSong-Regular}
+  \typeout{SII Song font: FandolSong (SimSun unavailable)}
+}}
+\IfFontExistsTF{KaiTi}{
+  \setCJKfamilyfont{proposal-kai}[AutoFakeBold=2.5]{KaiTi}
+}{\IfFontExistsTF{Kaiti SC}{
+  \setCJKfamilyfont{proposal-kai}{Kaiti SC}
+}{\setCJKfamilyfont{proposal-kai}{FandolKai-Regular}}}
+\IfFontExistsTF{FangSong}{
+  \setCJKfamilyfont{proposal-fang}{FangSong}
+}{\IfFontExistsTF{STFangsong}{
+  \setCJKfamilyfont{proposal-fang}{STFangsong}
+}{\setCJKfamilyfont{proposal-fang}{FandolFang-Regular}}}
+\newcommand{\ProposalKai}{\CJKfamily{proposal-kai}}
+\newcommand{\ProposalFang}{\CJKfamily{proposal-fang}}
+\pagestyle{empty}
+\linespread{1}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0pt}
+\setlength{\emergencystretch}{1em}
+\AtBeginDocument{\fontsize{12bp}{15.6bp}\selectfont}
+
+\newcommand{\ProposalMode}{all}
+\newcommand{\ProposalType}{}
+\newcommand{\StudentName}{}
+\newcommand{\StudentID}{}
+\newcommand{\AdvisorLeader}{}
+\newcommand{\AdvisorMembers}{}
+\newcommand{\ProposalTitle}{}
+\newcommand{\MajorField}{}
+\newcommand{\ProposalYear}{}
+\newcommand{\ProposalMonth}{}
+\newcommand{\ProposalDay}{}
+\newif\ifTemplateBlanks
+\TemplateBlankstrue
+\AtBeginDocument{
+  \ifboolexpr{test {\ifdefstring{\ProposalMode}{all}} or
+              test {\ifdefstring{\ProposalMode}{thesis}} or
+              test {\ifdefstring{\ProposalMode}{practice}}}{}
+    {\PackageError{sii-proposal}{Invalid ProposalMode}{Use all, thesis, or practice.}}
+  \ifboolexpr{test {\ifdefempty{\ProposalType}} or
+              test {\ifdefstring{\ProposalType}{thesis}} or
+              test {\ifdefstring{\ProposalType}{practice}}}{}
+    {\PackageError{sii-proposal}{Invalid ProposalType}{Use an empty value, thesis, or practice.}}
+  \hypersetup{pdftitle={上海创智学院博士研究生开题报告},pdfauthor={\StudentName}}
+}
+
+% 用矢量线条绘制勾选框，不依赖 Wingdings 等符号字体。
+\newcommand{\ProposalCheck}[1]{%
+  \tikz[baseline=-0.5mm,x=1mm,y=1mm]{%
+    \draw[line width=.4pt] (0,0) rectangle (2.8,2.8);
+    \ifdefstring{\ProposalType}{#1}{%
+      \draw[line width=.65pt] (.45,1.4)--(1.15,.55)--(2.4,2.25);
+    }{}%
+  }\kern.12em}
+\newcommand{\CoverField}[1]{\rule[-3.5mm]{0pt}{9.2mm}#1}
+\newcommand{\makeproposalcover}{%
+  \begin{titlepage}
+  \centering
+  \setlength{\parindent}{0pt}
+  \vspace*{-\topskip}
+  \includegraphics[width=5.5cm,height=5.5cm,keepaspectratio]{figures/sii_logo.pdf}\par
+  \nointerlineskip
+  \vspace{4.5mm}
+  {\fontsize{24bp}{32bp}\selectfont\bfseries
+    上海创智学院\par
+    \vspace{1mm}
+    博士研究生开题报告\par}
+  \vspace{10mm}
+  {\ProposalKai\fontsize{12bp}{15.6bp}\selectfont
+  \setlength{\tabcolsep}{1.5mm}
+  \setlength{\arrayrulewidth}{.5pt}
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}m{4.95cm}
+                       >{\raggedright\arraybackslash}m{8.25cm}@{}}
+    姓名 & \CoverField{\StudentName}\\\cline{2-2}
+    学号 & \CoverField{\StudentID}\\\cline{2-2}
+    开题类型 & \CoverField{\ProposalCheck{thesis}学位论文\quad
+                          \ProposalCheck{practice}实践成果}\\\cline{2-2}
+    导师组 & \CoverField{组长：\AdvisorLeader}\par
+              \CoverField{组员：\AdvisorMembers}\\\cline{2-2}
+    论文题目/实践成果名称 & \CoverField{\ProposalTitle}\\\cline{2-2}
+    专业/领域 & \CoverField{\MajorField}\\\cline{2-2}
+  \end{tabular}\par
+  \vspace{27mm}
+  \ProposalYear 年\quad\ProposalMonth 月\quad\ProposalDay 日\par}
+  \end{titlepage}
+}
+
+% breakable 保留原稿的单线外框，正文增长时可自然跨页。
+\newtcolorbox{proposalbody}{enhanced,breakable,sharp corners,
+  colback=white,colframe=black,boxrule=.5pt,
+  left=1.5mm,right=1.5mm,top=1mm,bottom=2mm,boxsep=0pt,
+  before upper={\setlength{\parindent}{2em}},
+  before skip=0pt,after skip=0pt,
+  pad at break*=2mm}
+\newcommand{\ProposalHeading}[2]{%
+  \par\addvspace{2.75mm}\needspace{2\baselineskip}%
+  \noindent #1.\enspace #2\par\nobreak
+}
+\newcommand{\WritingSpace}{%
+  \ifTemplateBlanks\vspace{16mm}\else\vspace{1mm}\fi
+}
+
+% 每行单独排版，允许在行之间分页，避免把整张进度表锁定在同一页。
+% 单行内部自动换行；极长阶段请拆成多行。
+\newenvironment{proposalschedule}{%
+  \par\begingroup\setlength{\parindent}{0pt}\setlength{\parskip}{0pt}%
+  \setlength{\tabcolsep}{2mm}%
+  \noindent\begin{tabularx}{\linewidth}{|>{\centering\arraybackslash}p{.22\linewidth}|
+    >{\centering\arraybackslash}X|>{\centering\arraybackslash}p{.43\linewidth}|}
+    \hline
+    \rule[-2mm]{0pt}{7.5mm}起讫时间 & 主要研究内容 & 预期结果、阶段性成果\\\hline
+  \end{tabularx}\par\nobreak\nointerlineskip
+}{\par\endgroup}
+\newcommand{\ScheduleRow}[3]{%
+  \noindent\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{.22\linewidth}|
+    >{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}p{.43\linewidth}|}
+    \rule[-2mm]{0pt}{7.5mm}#1 & #2 & #3\\\hline
+  \end{tabularx}\par\penalty0\nointerlineskip
+}
