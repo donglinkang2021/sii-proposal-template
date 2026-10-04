@@ -10,7 +10,16 @@
 \RequirePackage{etoolbox}
 \RequirePackage{needspace}
 \RequirePackage[breakable,skins]{tcolorbox}
+\RequirePackage{amsmath,amssymb,booktabs,longtable}
+\RequirePackage{caption,subcaption}
+% 国标著录 + 行内顺序编码；不使用国标样式默认的上标 cite。
+\RequirePackage[backend=biber,style=gb7714-2015,
+  sorting=none,sortcites=true]{biblatex}
+\let\cite\parencite
 \RequirePackage[hidelinks,unicode,hypertexnames=false]{hyperref}
+\RequirePackage{bookmark}
+\newif\ifProposalBibliography
+\AtDataInput{\global\ProposalBibliographytrue}
 
 % 优先使用原稿字体；在其他电脑上依次尝试 macOS 和 TeX Live 字体。
 % 不将商业字体复制进项目。日志会明确记录采用的字体。
@@ -19,12 +28,15 @@
   {\setmainfont{TeX Gyre Termes}}
 \IfFontExistsTF{SimSun}{
   \setCJKmainfont[AutoFakeBold=2.5]{SimSun}
+  \setCJKmonofont{SimSun}
   \typeout{SII Song font: SimSun}
 }{\IfFontExistsTF{Songti SC}{
   \setCJKmainfont[BoldFont=Songti SC Bold]{Songti SC}
+  \setCJKmonofont{Songti SC}
   \typeout{SII Song font: Songti SC (SimSun unavailable)}
 }{
   \setCJKmainfont[BoldFont=FandolSong-Bold]{FandolSong-Regular}
+  \setCJKmonofont{FandolSong-Regular}
   \typeout{SII Song font: FandolSong (SimSun unavailable)}
 }}
 \IfFontExistsTF{KaiTi}{
@@ -47,6 +59,8 @@
 \AtBeginDocument{\fontsize{12bp}{15.6bp}\selectfont}
 
 \newcommand{\ProposalMode}{all}
+\newcommand{\ProposalLayout}{template}
+\newif\ifProposalReport
 \newcommand{\ProposalType}{}
 \newcommand{\StudentName}{}
 \newcommand{\StudentID}{}
@@ -60,6 +74,9 @@
 \newif\ifTemplateBlanks
 \TemplateBlankstrue
 \AtBeginDocument{
+  \ifdefstring{\ProposalLayout}{report}{\ProposalReporttrue}{%
+    \ifdefstring{\ProposalLayout}{template}{}{%
+      \PackageError{sii-proposal}{Invalid ProposalLayout}{Use template or report.}}}
   \ifboolexpr{test {\ifdefstring{\ProposalMode}{all}} or
               test {\ifdefstring{\ProposalMode}{thesis}} or
               test {\ifdefstring{\ProposalMode}{practice}}}{}
@@ -68,6 +85,20 @@
               test {\ifdefstring{\ProposalType}{thesis}} or
               test {\ifdefstring{\ProposalType}{practice}}}{}
     {\PackageError{sii-proposal}{Invalid ProposalType}{Use an empty value, thesis, or practice.}}
+  \ifProposalReport
+    \ifdefstring{\ProposalMode}{all}{%
+      \PackageError{sii-proposal}{Report layout requires one proposal type}{Set ProposalMode to thesis or practice; all is only for template layout.}}{}
+    \ifdefempty{\ProposalType}{\let\ProposalType\ProposalMode}{%
+      \ifdefstrequal{\ProposalType}{\ProposalMode}{}{%
+        \PackageError{sii-proposal}{ProposalType conflicts with ProposalMode}{In report layout, leave ProposalType empty or make it match ProposalMode.}}}
+    \TemplateBlanksfalse
+    \setcounter{tocdepth}{2}
+    \setcounter{secnumdepth}{2}
+    \ctexset{section={format=\normalfont\bfseries\fontsize{12bp}{15.6bp}\selectfont,
+      name={},number=\arabic{section},aftername=\quad},
+      subsection={format=\normalfont\bfseries\fontsize{12bp}{15.6bp}\selectfont,
+      number=\arabic{section}.\arabic{subsection},aftername=\quad}}
+  \fi
   \hypersetup{pdftitle={上海创智学院博士研究生开题报告},pdfauthor={\StudentName}}
 }
 
@@ -113,23 +144,43 @@
 }
 
 % breakable 保留原稿的单线外框，正文增长时可自然跨页。
-\newtcolorbox{proposalbody}{enhanced,breakable,sharp corners,
+\newtcolorbox{proposalframe}{enhanced,breakable,sharp corners,
   colback=white,colframe=black,boxrule=.5pt,
   left=1.5mm,right=1.5mm,top=1mm,bottom=2mm,boxsep=0pt,
   before upper={\setlength{\parindent}{2em}},
   before skip=0pt,after skip=0pt,
   pad at break*=2mm}
-\newcommand{\ProposalHeading}[2]{%
+\newcounter{proposaloutline}
+\newenvironment{proposalbody}{%
+  \setcounter{proposaloutline}{0}\setcounter{section}{0}%
+  \ifProposalReport\let\ProposalBodyStart\relax\let\ProposalBodyEnd\par
+  \else\def\ProposalBodyStart{\begin{proposalframe}}%
+       \def\ProposalBodyEnd{\end{proposalframe}}\fi
+  \ProposalBodyStart
+}{\ProposalBodyEnd}
+\newcommand{\ProposalBodyIntro}[1]{\ifProposalReport\else
+  \noindent\textbf{#1}开题报告应包括但不限于：\par\fi}
+\newcommand{\ProposalTemplateHeading}[2]{%
   \par\addvspace{2.75mm}\needspace{2\baselineskip}%
   \noindent #1.\enspace #2\par\nobreak
 }
+\newcommand{\ProposalSection}[1]{%
+  \ifProposalReport\section{#1}\else
+    \refstepcounter{proposaloutline}%
+    \ProposalTemplateHeading{\arabic{proposaloutline}}{#1}\fi}
+% 兼容旧的显式编号入口；后续 ProposalSection 从该编号继续。
+\newcommand{\ProposalHeading}[2]{%
+  \ifProposalReport\setcounter{section}{\numexpr#1-1\relax}\section{#2}%
+  \else\setcounter{proposaloutline}{\numexpr#1-1\relax}%
+    \ProposalSection{#2}\fi}
 \newcommand{\WritingSpace}{%
-  \ifTemplateBlanks\vspace{16mm}\else\vspace{1mm}\fi
+  \ifProposalReport\else
+    \ifTemplateBlanks\vspace{16mm}\else\vspace{1mm}\fi\fi
 }
 
 % 每行单独排版，允许在行之间分页，避免把整张进度表锁定在同一页。
 % 单行内部自动换行；极长阶段请拆成多行。
-\newenvironment{proposalschedule}{%
+\newenvironment{proposaltemplateschedule}{%
   \par\begingroup\setlength{\parindent}{0pt}\setlength{\parskip}{0pt}%
   \setlength{\tabcolsep}{2mm}%
   \noindent\begin{tabularx}{\linewidth}{|>{\centering\arraybackslash}p{.22\linewidth}|
@@ -138,9 +189,50 @@
     \rule[-2mm]{0pt}{7.5mm}起讫时间 & 主要研究内容 & 预期结果、阶段性成果\\\hline
   \end{tabularx}\par\nobreak\nointerlineskip
 }{\par\endgroup}
-\newcommand{\ScheduleRow}[3]{%
+\newcommand{\ProposalTemplateRow}[3]{%
   \noindent\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{.22\linewidth}|
     >{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}p{.43\linewidth}|}
     \rule[-2mm]{0pt}{7.5mm}#1 & #2 & #3\\\hline
   \end{tabularx}\par\penalty0\nointerlineskip
 }
+\newcommand{\ProposalReportRow}[3]{%
+  \rule[-2mm]{0pt}{7.5mm}#1 & #2 & #3\\\hline}
+\newcommand{\ProposalScheduleHead}{%
+  \rule[-2mm]{0pt}{7.5mm}起讫时间 & 主要研究内容 & 预期结果、阶段性成果\\\hline}
+\newcounter{proposalprogress}
+\newenvironment{proposalreportschedule}{%
+  \par\setlength{\tabcolsep}{2mm}%
+  % 进度表没有题注，不占用正文中有编号表格的序号。
+  \renewcommand{\LTcaptype}{proposalprogress}%
+  \begin{longtable}{|>{\raggedright\arraybackslash}p{.22\linewidth}|
+    >{\raggedright\arraybackslash}p{\dimexpr.35\linewidth-6\tabcolsep-4\arrayrulewidth\relax}|
+    >{\raggedright\arraybackslash}p{.43\linewidth}|}
+    \hline\ProposalScheduleHead\endfirsthead
+    \hline\ProposalScheduleHead\endhead
+    \endfoot\endlastfoot
+}{\end{longtable}}
+\newcommand{\ScheduleRow}[3]{\ProposalTemplateRow{#1}{#2}{#3}}
+\newenvironment{proposalschedule}{%
+  \ifProposalReport
+    \let\ScheduleRow\ProposalReportRow
+    \def\ProposalScheduleStart{\begin{proposalreportschedule}}%
+    \def\ProposalScheduleEnd{\end{proposalreportschedule}}%
+  \else
+    \let\ScheduleRow\ProposalTemplateRow
+    \def\ProposalScheduleStart{\begin{proposaltemplateschedule}}%
+    \def\ProposalScheduleEnd{\end{proposaltemplateschedule}}%
+  \fi\ProposalScheduleStart
+}{\ProposalScheduleEnd}
+
+\newcommand{\makeproposalcontents}{%
+  \ifProposalReport
+    \clearpage\pagestyle{plain}\pagenumbering{Roman}%
+    \tableofcontents\clearpage\pagenumbering{arabic}%
+  \fi}
+\newcommand{\printproposalbibliography}{%
+  \ifProposalBibliography
+    \clearpage
+    \ifProposalReport
+      \printbibliography[heading=bibintoc,title={参考文献}]%
+    \else\printbibliography[title={参考文献}]\fi
+  \fi}

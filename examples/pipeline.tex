@@ -1,0 +1,10 @@
+% !TeX root = ../example.tex
+% 项目内可复现的矢量示意图；无外部图片或生成步骤。
+\begin{tikzpicture}[every node/.style={draw,rounded corners,
+  minimum width=2.7cm,minimum height=1cm,font=\small},>=stealth]
+  \node (data) at (0,0) {数据划分};
+  \node (model) at (4,0) {特征提取};
+  \node (eval) at (8,0) {独立评估};
+  \draw[->,thick] (data) -- (model);
+  \draw[->,thick] (model) -- (eval);
+\end{tikzpicture}

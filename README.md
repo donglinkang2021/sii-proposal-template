@@ -1,58 +1,207 @@
 # 上海创智学院博士研究生开题报告 LaTeX 模板
 
-依据当前文件夹的 DOCX 制作。默认输出四页：封面、填写说明、学位论文提纲、实践成果提纲。封面直接使用 `figures/sii_logo.pdf`。
+依据本目录的 DOCX 制作，保留 `ctexart`、字体回退和 XeLaTeX + latexmk。默认输出四页空白模板：封面、填写说明、学位论文提纲、实践成果提纲。封面使用 `figures/sii_logo.pdf`。
 
-## 在 VS Code / LaTeX Workshop 中编辑和预览
+## 编译与预览
 
-用 VS Code 打开整个 `proposal` 文件夹。项目沿用用户设置中已有的 `xelatex-latexmk` recipe，使用 XeLaTeX 和 latexmk 自动完成需要的编译轮次；用户级 `settings.json` 无需修改。
-
-1. 编辑 `metadata.tex` 填写封面，编辑 `sections/thesis.tex` 或 `sections/practice.tex` 撰写报告。
-2. 保存文件后，沿用 LaTeX Workshop 默认的文件变化自动编译。也可点击编辑器右上角的 **Build LaTeX project**（macOS 默认 `⌥⌘B`）。
-3. 点击 **View LaTeX PDF file**（`⌥⌘V`）打开右侧内置 PDF 预览。编译成功后预览自动刷新。
-4. 沿用你设置的 **双击 PDF** 返回对应源码；从源码跳到 PDF 使用 **SyncTeX from cursor**（`⌥⌘J`）。封面的信息由宏生成，定位可能落到封面排版宏，而非 `metadata.tex` 字段；正文可直接定位到对应章节。
-
-所有子文件已声明 `% !TeX root`，在章节文件中点击编译也会构建 `main.tex`。PDF、SyncTeX 和辅助文件统一生成在 `output/`；资源管理器保留 PDF，隐藏辅助文件及内部检查目录。
-
-项目级 `.vscode/settings.json` 指定现有 recipe 名称，没有复制或覆盖你的工具列表。如果换到另一台电脑，需要同名 recipe（`latexmk -xelatex -synctex=1 -outdir=%OUTDIR% %DOC%`），或者在工作区设置中改选等价的 XeLaTeX + latexmk recipe。
-
-## 命令行编译
-
-在本目录执行：
+在项目根目录执行：
 
 ```sh
-latexmk -xelatex main.tex
+latexmk -xelatex main.tex       # 用户报告 -> output/main.pdf
+latexmk -xelatex example.tex    # 独立科研示例 -> output/example.pdf
 ```
 
-成品位于 `output/main.pdf`，同步文件为 `output/main.synctex.gz`，辅助文件也在 `output/`。命令行与 LaTeX Workshop 使用同一个输出位置。本机已有所需的 TeX Live 2025 和宏包。
+需要 XeLaTeX、latexmk、Biber，以及 `ctex`、`biblatex`、`biblatex-gb7714-2015`、`amsmath`、`booktabs`、`caption`、`subcaption`、`longtable` 等宏包（本机 TeX Live 2025 已安装）。latexmk 自动运行 XeLaTeX、Biber 和必要的重复编译；不要手动运行 BibTeX，也不要混入其他模板的参考文献配置。第一次编译出现“请运行 Biber”或未解析引用提示属于中间轮次，最终日志应已消除这些提示。
+
+PDF、SyncTeX 和辅助文件统一生成在 `output/`。两入口使用各自的文件名，编译示例不会覆盖主报告。排查缓存问题时可执行 `latexmk -C main.tex` 后重编译（该命令会删除主报告的生成文件）。
+
+用 VS Code 打开整个 `proposal` 文件夹。项目级 `.vscode/settings.json` 沿用已有 `xelatex-latexmk` recipe，不修改用户全局设置。另一台电脑需配置同名 recipe，命令为 `latexmk -xelatex -synctex=1 -outdir=%OUTDIR% %DOC%`，或选择等价的 XeLaTeX + latexmk recipe。
+
+- 保存文件后沿用 LaTeX Workshop 的文件变化自动编译，也可使用 **Build LaTeX project**（macOS 默认 `⌥⌘B`）。
+- **View LaTeX PDF file**（`⌥⌘V`）打开 PDF；双击 PDF 返回源码，源码跳转 PDF 使用 **SyncTeX from cursor**（`⌥⌘J`）。封面字段由宏排版，定位可能落到样式宏。
+- 用户正文与 `metadata.tex` 的 `% !TeX root` 指向 `main.tex`。`example.tex` 明确指向自身，`examples/` 中的示例子文件指向它；编译示例时打开 `example.tex`。
+
+## 切换模式
+
+编辑 `metadata.tex` 中已有设置，不要重复定义同一个选项。
+
+| 设置或行为 | `template`（默认） | `report`（正式撰写） |
+| --- | --- | --- |
+| `\ProposalMode` | `all`、`thesis`、`practice` | 必须为 `thesis` 或 `practice` |
+| `\ProposalType` | 留空不勾选，或独立指定封面类型 | 留空自动跟随正文；显式冲突会报错 |
+| 填写说明、正文外框 | 保留 | 隐藏 |
+| `\TemplateBlanks` | 控制填写留白 | 自动关闭 |
+| 目录 | 不输出 | 两级标题和参考文献 |
+| 页码 | 不显示 | 封面无页码；目录罗马数字；正文从 1 开始 |
+| 正文分页 | 外框可跨页 | 连续单面排版，无奇偶页留白 |
+
+正式学位论文配置：
+
+```tex
+\renewcommand{\ProposalLayout}{report}
+\renewcommand{\ProposalMode}{thesis}
+\renewcommand{\ProposalType}{}
+```
+
+正式实践成果配置：
+
+```tex
+\renewcommand{\ProposalLayout}{report}
+\renewcommand{\ProposalMode}{practice}
+\renewcommand{\ProposalType}{}
+```
+
+恢复原始四页空白模板：
+
+```tex
+\renewcommand{\ProposalLayout}{template}
+\renewcommand{\ProposalMode}{all}
+\renewcommand{\ProposalType}{}
+\TemplateBlankstrue
+```
+
+在 `metadata.tex` 填写姓名、学号、导师组、题目、专业和日期。正式版顺序为封面、目录、所选正文、参考文献，不包含填写说明或摘要；未引用文献时不生成文献页。两种正文均保留原七项提纲。
+
+## 正文与标题
+
+在 `sections/thesis.tex` 或 `sections/practice.tex` 的标题后写正文，段落间留空行。`\WritingSpace` 在正式模式中不起作用，可以保留。
+
+```tex
+\ProposalSection{研究目标与关键科学问题}\label{sec:goals}
+在这里阐明研究目标。
+
+\subsection{关键科学问题}\label{subsec:question}
+正文可引用第\ref{sec:goals}节和第\ref{subsec:question}节。
+```
+
+`\ProposalSection` 在模板模式中保留原提纲外观，在正式模式中生成标准一级标题、目录项和 PDF 书签。每个 `proposalbody` 从 1 开始编号；两个模板提纲各自编号 1–7。旧入口 `\ProposalHeading{3}{标题}` 仍可使用，编号须为整数，后续自动编号从这里继续。二级标题使用 `\subsection`，标签紧跟标题。正文中 `&`、`%`、`_` 应写作 `\&`、`\%`、`\_`。
+
+## 参考文献
+
+使用 **GB/T 7714—2015 顺序编码制**，正文标准 `\cite` 为行内 `[1]`，按首次引用顺序编号；重复引用保持编号，多篇引用自动排序、压缩。具体页码按国标样式放在引文方括号后上标。
+
+用户文献存入 UTF-8 文件 `references.bib`，该文件默认只有说明，不包含示例条目。示例使用独立的 `examples/references.bib`。请核实实际引用文献的作者、题名、版本、出版信息和页码。
+
+以下是真实书目的可复制写法（仅在需要引用时添加）：
+
+```bibtex
+@book{li2019statistical,
+  author    = {李航},
+  title     = {统计学习方法},
+  edition   = {2},
+  location  = {北京},
+  publisher = {清华大学出版社},
+  date      = {2019},
+  isbn      = {9787302517276}
+}
+```
+
+```tex
+统计学习基础可参见\cite{li2019statistical}。
+关于模型评估的讨论见\cite[19--24]{li2019statistical}。
+% 多篇引用：先在 references.bib 中添加相应条目，再引用：
+% \cite{key1,key2}
+```
+
+主入口已加载文献库并在正文后调用 `\printproposalbibliography`。文献列表在正式模式中单独起页并进入目录，中英文条目共用列表。不需要手写编号、`thebibliography` 或 `\bibliographystyle`；未引用条目不会出现。添加或修改引用后仍只运行原来的 latexmk 命令。
+
+## 图表与公式
+
+正式模式使用标准浮动体；`\label` 放在 `\caption` 后。图、表、公式各自连续编号，引用可点击跳转。
+
+```tex
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=.45\linewidth]{figures/sii_logo.pdf}
+  \caption{示例插图}\label{fig:sample}
+\end{figure}
+如图\ref{fig:sample}所示。
+
+\begin{table}[htbp]
+  \centering
+  \caption{演示数据}\label{tab:sample}
+  \begin{tabular}{lrr}
+    \toprule
+    方法 & 样本数 & 得分\\
+    \midrule
+    基线 & 100 & 0.72\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+见表\ref{tab:sample}。
+```
+
+子图使用 `subcaption` 的 `subfigure` 环境；可复制 `examples/research.tex` 中完整的双子图示例。浮动体由 LaTeX 安排位置，不保证紧贴源码所在段落。
+
+```tex
+行内公式：$y=f_\theta(x)$。
+\begin{equation}\label{eq:loss}
+  \mathcal{L}(\theta)=\frac{1}{n}\sum_{i=1}^{n}(f_\theta(x_i)-y_i)^2.
+\end{equation}
+\begin{align}
+  g_t &= \nabla_\theta\mathcal{L}(\theta_t),\label{eq:grad}\\
+  \theta_{t+1} &= \theta_t-\eta_t g_t.\label{eq:step}
+\end{align}
+目标函数见式\eqref{eq:loss}，更新见式\eqref{eq:step}。
+```
+
+模板模式的外框内不能使用普通 `figure`、`table` 浮动体。使用非浮动内容与 `\captionof`，较短内容可放在 `minipage` 中以避免图片和题注分离：
+
+```tex
+\noindent\begin{minipage}{\linewidth}
+  \centering
+  \includegraphics[width=.35\linewidth]{figures/sii_logo.pdf}
+  \captionof{figure}{非浮动插图}\label{fig:boxed}
+\end{minipage}
+
+\noindent\begin{minipage}{\linewidth}
+  \centering
+  \captionof{table}{非浮动表格}\label{tab:boxed}
+  \begin{tabular}{lr}
+    \toprule
+    方法 & 得分\\\midrule
+    基线 & 0.72\\\bottomrule
+  \end{tabular}
+\end{minipage}
+```
+
+`minipage` 不跨页，图片或表格总高度须小于一页。较长正式内容建议切换 `report` 模式。
+
+## 研究进度
+
+两种模式均复用相同接口：
+
+```tex
+\begin{proposalschedule}
+  \ScheduleRow{2026.10--12}{调研相关工作、明确问题。}{文献综述与问题清单。}
+  \ScheduleRow{2027.01--03}{完成基线实现与对照实验。}{实验记录和阶段报告。}
+\end{proposalschedule}
+```
+
+正式模式使用 `longtable`，行间可自然分页，续页重复表头；不要将它放入 `table`、`minipage` 或其他外框中。模板模式保持原三列网格和空白行高度，续页不重复表头。两种模式的单行均不能在行内分页，超过一页的阶段须拆成多行。
+
+## 独立示例与文件结构
+
+`example.tex` 不读取用户元数据或正文，使用正式学位论文模式，包含七项提纲、中英文文献、重复及多篇引用、页码引文、插图和子图、三线表、行内及多行公式、标题引用、跨页进度表。所有数值和研究安排均明确标为演示。示意图由项目内 TikZ 源码生成，无下载步骤。
+
+示例书目核对来源：[清华大学出版社《统计学习方法》第 2 版](https://www.tup.tsinghua.edu.cn/bookscenter/book_08132901.html)、[CVF 原始论文出版页](https://www.cv-foundation.org/openaccess/content_cvpr_2016/html/He_Deep_Residual_Learning_CVPR_2016_paper.html)。书目文件顺序特意与引用顺序不同，可观察按首次引用编号的效果。
 
 ```text
 proposal/
-├── .vscode/settings.json    # 当前项目的编辑器配置
-├── .latexmkrc              # 编译和输出目录
-├── main.tex                # 主文件
-├── metadata.tex            # 封面信息与输出选项
-├── sii-proposal.sty         # 版式和字体
-├── sections/               # 正文编辑区
-├── figures/sii_logo.pdf     # 校徽
-└── output/main.pdf         # 编译与预览结果
+├── main.tex                 # 用户报告入口
+├── metadata.tex             # 封面信息、版式及正文类型
+├── references.bib           # 用户文献库，默认无条目
+├── sii-proposal.sty          # 共享版式、字体及科研写作支持
+├── sections/                # 用户正文及原填写说明
+├── example.tex              # 独立示例入口
+├── examples/                # 示例正文、文献及矢量示意图
+├── figures/sii_logo.pdf      # 校徽
+├── .latexmkrc               # XeLaTeX + 自动 Biber，输出到 output/
+└── output/                  # main.pdf、example.pdf 及各自辅助文件
 ```
-
-## 填写
-
-1. 在 `metadata.tex` 中填写姓名、学号、导师组、题目、专业和日期。花括号留空即保留空白。
-2. `\ProposalMode` 设为 `all` 输出两类提纲，`thesis` 仅输出学位论文提纲，`practice` 仅输出实践成果提纲。填写说明始终保留。
-3. `\ProposalType` 设为 `thesis` 或 `practice` 勾选封面对应选项，留空则均不勾选。
-4. 开始正式撰写时将 `\TemplateBlankstrue` 改为 `\TemplateBlanksfalse`，关闭预留空白；在 `sections/thesis.tex` 或 `sections/practice.tex` 的标题之后直接填写正文。正文按段落自然跨页，外框跟随分页。
-5. 研究进度每个阶段使用 `\ScheduleRow{起讫时间}{主要研究内容}{阶段性成果}`。可增删行，行间可分页，单行内部自动换行。一个阶段若长于一页，请拆成多行；续页表头不自动重复。
-
-标题和正文中使用的 `&`、`%`、`_` 等 LaTeX 特殊字符分别写为 `\&`、`\%`、`\_`。插图可在正文中直接用 `\includegraphics[width=\linewidth]{figures/文件名}`；外框内不要使用浮动的 `figure` 或 `table` 环境。
 
 ## 字体与版式
 
-- A4；上下页边距 2.54 cm，左右 3.175 cm；无页眉页码。
-- 封面标题 24 bp；封面信息使用 12 bp 楷体，说明使用 12 bp 仿宋，正文使用 12 bp 宋体类字体；西文优先 Times New Roman。
-- 中文优先使用 SimSun、KaiTi 和 FangSong。本机已安装楷体、仿宋；未安装 SimSun 时使用 macOS 的 Songti SC。因此宋体部分与 Windows 原版可能有细微字形和换行差异。
-- 换电脑后会依次尝试 macOS 字体和 TeX Live 自带 Fandol 字体，不会因缺少专有字体立即编译失败。字体回退可能改变分页；需要严格一致时，应在新电脑安装相同字体。
-- 进度表保留 DOCX 中定义的三列网格边框（Pages 导入时可能不显示嵌套表格边框）。空白模板优先复现原稿；正式撰写时允许自然增页。
+A4；上下页边距 2.54 cm，左右 3.175 cm。封面标题 24 bp，封面信息 12 bp 楷体，填写说明 12 bp 仿宋，正文 12 bp 宋体类字体，西文优先 Times New Roman。正式模式无页眉，页码居中置于页脚。
 
-`sii-proposal.sty` 集中管理版式，日常填写通常只需修改 `metadata.tex` 和 `sections/` 下的内容。
+中文优先 SimSun、KaiTi 和 FangSong，依次回退到 macOS 字体和 TeX Live 自带 Fandol。本机未安装 SimSun，使用 Songti SC。换电脑后的字体回退可能改变字形、换行及分页，严格复现需安装相同字体。样式集中在 `sii-proposal.sty`，日常写作只需修改元数据、所选正文和用户文献库。

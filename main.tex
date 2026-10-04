@@ -3,14 +3,16 @@
 \documentclass[UTF8,fontset=none,zihao=-4]{ctexart}
 \usepackage{sii-proposal}
 \input{metadata}
+\addbibresource{references.bib}
 
 \begin{document}
 \makeproposalcover
-\input{sections/instructions}
+\ifProposalReport\makeproposalcontents\else\input{sections/instructions}\fi
 \ifboolexpr{test {\ifdefstring{\ProposalMode}{all}} or
             test {\ifdefstring{\ProposalMode}{thesis}}}
   {\input{sections/thesis}}{}
 \ifboolexpr{test {\ifdefstring{\ProposalMode}{all}} or
             test {\ifdefstring{\ProposalMode}{practice}}}
   {\input{sections/practice}}{}
+\printproposalbibliography
 \end{document}

@@ -1,0 +1,19 @@
+% !TeX root = example.tex
+% 独立示例：latexmk -xelatex example.tex -> output/example.pdf
+\documentclass[UTF8,fontset=none,zihao=-4]{ctexart}
+\usepackage{sii-proposal}
+\renewcommand{\ProposalLayout}{report}
+\renewcommand{\ProposalMode}{thesis}
+\renewcommand{\StudentName}{示例作者（演示）}
+\renewcommand{\ProposalTitle}{面向小样本识别的模型评估方法研究}
+\renewcommand{\MajorField}{人工智能（科研写作示例）}
+\renewcommand{\ProposalYear}{2026}
+\renewcommand{\ProposalMonth}{10}
+\renewcommand{\ProposalDay}{4}
+\addbibresource{examples/references.bib}
+\begin{document}
+\makeproposalcover
+\makeproposalcontents
+\input{examples/research}
+\printproposalbibliography
+\end{document}

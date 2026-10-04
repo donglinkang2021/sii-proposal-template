@@ -1,0 +1,127 @@
+% !TeX root = ../example.tex
+\begin{proposalbody}
+\ProposalSection{选题背景与意义、研究创新点}\label{sec:background}
+\subsection{研究背景}
+本文件演示开题报告的科研排版接口。所有实验数值、进度安排和研究设想均为演示，
+不代表已经完成的研究，也不是可直接提交的开题报告。
+统计学习为模型选择和泛化分析提供了基础概念\cite{li2019statistical}。
+本示例拟研究在标注样本有限时，如何建立可复现的模型评估流程。
+
+\subsection{拟探索的创新点}
+拟将数据划分、模型训练、误差分析和结果复核纳入同一实验流程，
+重点检验不同随机划分下结论是否稳定。研究创新性需要通过系统文献检索和真实实验论证，
+这里仅展示“问题、方法、证据”之间的写作关系。
+
+\ProposalSection{现有相关研究及文献综述}\label{sec:related}
+\subsection{代表性方法与研究基础}
+残差学习通过对残差函数建模，缓解深层网络的训练困难\cite{he2016resnet}。
+统计学习方法中的模型评估、正则化和交叉验证概念可用于设计对照实验\cite[19--24]{li2019statistical}。
+这两类工作分别提供模型构建与实验设计的参考\cite{li2019statistical,he2016resnet}。
+重复引用同一文献应保持编号不变，例如再次引用残差网络\cite{he2016resnet}。
+
+\subsection{研究不足与问题界定}
+上述文献的研究对象与本示例设想并不完全相同，不能直接推断模型在新数据上的性能。
+文献综述应交代数据来源、评价指标、实验条件和结论边界，并明确尚需验证的假设。
+本研究拟先固定数据划分协议，再比较方法差异，避免用不同测试条件下的数值支持同一结论。
+
+\ProposalSection{研究目标与关键科学问题}\label{sec:goals}
+目标是建立可复核的评估流程，并回答样本规模变化是否影响模型排序。
+设训练样本为 $\mathcal{D}=\{(x_i,y_i)\}_{i=1}^{n}$，预测函数为 $f_\theta$。
+研究将报告各次独立运行结果，而不仅报告最高准确率。第\ref{sec:method}节给出技术路线，
+第\ref{subsec:protocol}节说明对照实验协议。
+
+\ProposalSection{研究方法与技术路线、可行性分析}\label{sec:method}
+\subsection{技术路线}
+图\ref{fig:pipeline}给出了数据、模型和评估之间的依赖关系。
+测试集在模型选择阶段保持独立；所有超参数和预处理操作均记录在实验配置中。
+\begin{figure}[htbp]
+  \centering
+  \input{examples/pipeline}
+  \caption{研究流程示意图（演示）}\label{fig:pipeline}
+\end{figure}
+
+\subsection{目标函数与优化}
+采用带正则化的经验风险作为目标函数，式\eqref{eq:objective}中的 $\lambda$ 控制正则项强度：
+\begin{equation}\label{eq:objective}
+  \mathcal{L}(\theta)=\frac{1}{n}\sum_{i=1}^{n}
+  \ell\bigl(f_\theta(x_i),y_i\bigr)+\lambda\lVert\theta\rVert_2^2.
+\end{equation}
+多行公式可以分别编号并引用。示例更新过程为
+\begin{align}
+  g_t &= \nabla_\theta\mathcal{L}(\theta_t),\label{eq:gradient}\\
+  \theta_{t+1} &= \theta_t-\eta_t g_t.\label{eq:update}
+\end{align}
+式\eqref{eq:gradient}定义梯度，式\eqref{eq:update}描述参数更新。
+正式研究需说明损失函数、学习率 $\eta_t$ 和停止条件的具体选择依据。
+
+\ProposalSection{初步实验设计及预期成果}
+\subsection{对照实验协议}\label{subsec:protocol}
+在每种样本规模下，使用相同的数据划分比较基线和候选方法，并记录计算成本。
+表\ref{tab:demo}仅用于展示三线表，数值为手工构造的演示数据，不能用于推断方法优劣。
+\begin{table}[htbp]
+  \centering
+  \caption{准确率示例（演示数据，非真实实验结果）}\label{tab:demo}
+  \begin{tabular}{lrrr}
+    \toprule
+    方法 & 样本数 & 准确率（\%） & 运行次数\\
+    \midrule
+    基线方法 & 100 & 72.0 & 5\\
+    候选方法 & 100 & 74.0 & 5\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{结果展示与误差分析}
+图\ref{fig:panels}展示子图排版：图\ref{fig:train}表示训练过程，
+图\ref{fig:eval}表示独立评估。折线仅为示意，不是观测数据。
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{.46\linewidth}
+    \centering
+    \begin{tikzpicture}[x=.85cm,y=.7cm]
+      \draw[->] (0,0)--(4,0) node[below,font=\small]{轮次};
+      \draw[->] (0,0)--(0,2.7) node[above,font=\small]{损失};
+      \draw[thick] plot coordinates {(0.2,2.2) (1,1.5) (2,1) (3,.7) (3.7,.6)};
+    \end{tikzpicture}
+    \caption{训练过程（示意）}\label{fig:train}
+  \end{subfigure}\hfill
+  \begin{subfigure}{.46\linewidth}
+    \centering
+    \begin{tikzpicture}[x=.85cm,y=.7cm]
+      \draw[->] (0,0)--(4,0) node[below,font=\small]{样本};
+      \draw[->] (0,0)--(0,2.7) node[above,font=\small]{得分};
+      \draw[thick,dashed] plot coordinates {(0.2,1) (1,1.4) (2,1.7) (3,1.8) (3.7,2)};
+    \end{tikzpicture}
+    \caption{独立评估（示意）}\label{fig:eval}
+  \end{subfigure}
+  \caption{不同环节的可视化占位图（演示）}\label{fig:panels}
+\end{figure}
+预期形成数据划分协议、实验记录、误差分析报告及可复现代码。
+若观察到性能差异，应结合运行波动、计算开销和失败案例讨论其适用边界。
+
+\ProposalSection{研究进度安排}
+下表刻意采用较细的阶段划分，演示自然跨页与重复表头；日期和任务均为演示。
+每行应控制在一页内，过长的阶段可拆成多个子阶段。
+\begin{proposalschedule}
+  \ScheduleRow{2026.10}{检索基础文献，建立问题清单。}{文献笔记、研究范围说明和待核实问题列表。}
+  \ScheduleRow{2026.11}{梳理代表性方法及其适用条件。}{方法比较表及数据、指标、实验条件的对应记录。}
+  \ScheduleRow{2026.12}{确定数据来源并检查使用条件。}{数据来源记录、版本信息及基本质量检查报告。}
+  \ScheduleRow{2027.01}{制定数据划分与预处理协议。}{固定划分清单、预处理配置和复现实验说明。}
+  \ScheduleRow{2027.02}{实现基础模型和训练流程。}{基线代码、训练日志与环境依赖记录。}
+  \ScheduleRow{2027.03}{复查基线训练结果。}{独立运行记录、错误样本分析与实现核对表。}
+  \ScheduleRow{2027.04}{实现候选方法并检查数值稳定性。}{候选方法代码、单次运行记录和稳定性分析。}
+  \ScheduleRow{2027.05}{进行超参数选择及敏感性分析。}{验证集结果、参数选择依据和搜索范围记录。}
+  \ScheduleRow{2027.06}{开展不同样本规模的对照实验。}{样本规模与模型性能的对应数据及完整配置。}
+  \ScheduleRow{2027.07}{重复运行并汇总结果波动。}{各次运行结果、波动统计和异常结果复核记录。}
+  \ScheduleRow{2027.08}{开展模块消融和计算成本分析。}{消融表、计算资源记录和方法适用条件说明。}
+  \ScheduleRow{2027.09}{分析失败案例及边界条件。}{失败案例集、误差归因和后续改进建议。}
+  \ScheduleRow{2027.10}{整理可复现代码和实验配置。}{可运行代码、版本说明与实验复核清单。}
+  \ScheduleRow{2027.11}{撰写研究报告并核对引用。}{报告初稿、参考文献清单和证据对应表。}
+  \ScheduleRow{2027.12}{复核结论并完善成果材料。}{最终报告、复现实验记录和成果归档材料。}
+\end{proposalschedule}
+
+\ProposalSection{与选题有关的工作积累、已有的研究工作成绩}
+本示例未声明任何真实研究成绩。实际撰写时，应区分已完成工作、初步结果和拟开展工作，
+对已有数据说明来源、采集条件和复现方式，并明确个人贡献。
+研究积累应能支撑第\ref{sec:goals}节提出的目标，尚未获得的结果应如实列为后续计划。
+\end{proposalbody}

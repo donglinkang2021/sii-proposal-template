@@ -1,7 +1,9 @@
 % !TeX root = main.tex
+% 版式：template = 原始空白模板；report = 正式报告（需选择一种正文）。
+\renewcommand{\ProposalLayout}{template}
 % 输出范围：all = 完整四页模板；thesis = 学位论文；practice = 实践成果。
 \renewcommand{\ProposalMode}{all}
-% 封面勾选：留空、thesis 或 practice；与输出范围分别设置。
+% 封面勾选：留空、thesis 或 practice。report 中留空则跟随正文，不能冲突。
 \renewcommand{\ProposalType}{}
 
 \renewcommand{\StudentName}{}
@@ -14,5 +16,5 @@
 \renewcommand{\ProposalMonth}{}
 \renewcommand{\ProposalDay}{}
 
-% 空白模板保留原稿填写空间。开始撰写后改为 \TemplateBlanksfalse。
+% 仅用于 template 模式；report 自动关闭外框与填写留白。
 \TemplateBlankstrue
