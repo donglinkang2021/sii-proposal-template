@@ -26,7 +26,13 @@
 % 不将商业字体复制进项目。日志会明确记录采用的字体。
 \IfFontExistsTF{Times New Roman}
   {\setmainfont{Times New Roman}}
-  {\setmainfont{TeX Gyre Termes}}
+  % 按文件加载 TeX Live 字体，不依赖系统 fontconfig 的字体名称索引。
+  {\setmainfont{texgyretermes}[
+    Extension=.otf,
+    UprightFont=*-regular,
+    BoldFont=*-bold,
+    ItalicFont=*-italic,
+    BoldItalicFont=*-bolditalic]}
 \IfFontExistsTF{SimSun}{
   \setCJKmainfont[AutoFakeBold=2.5]{SimSun}
   \setCJKmonofont{SimSun}
@@ -36,20 +42,20 @@
   \setCJKmonofont{Songti SC}
   \typeout{SII Song font: Songti SC (SimSun unavailable)}
 }{
-  \setCJKmainfont[BoldFont=FandolSong-Bold]{FandolSong-Regular}
-  \setCJKmonofont{FandolSong-Regular}
+  \setCJKmainfont[Extension=.otf,BoldFont=FandolSong-Bold]{FandolSong-Regular}
+  \setCJKmonofont[Extension=.otf]{FandolSong-Regular}
   \typeout{SII Song font: FandolSong (SimSun unavailable)}
 }}
 \IfFontExistsTF{KaiTi}{
   \setCJKfamilyfont{proposal-kai}[AutoFakeBold=2.5]{KaiTi}
 }{\IfFontExistsTF{Kaiti SC}{
   \setCJKfamilyfont{proposal-kai}{Kaiti SC}
-}{\setCJKfamilyfont{proposal-kai}{FandolKai-Regular}}}
+}{\setCJKfamilyfont{proposal-kai}[Extension=.otf]{FandolKai-Regular}}}
 \IfFontExistsTF{FangSong}{
   \setCJKfamilyfont{proposal-fang}{FangSong}
 }{\IfFontExistsTF{STFangsong}{
   \setCJKfamilyfont{proposal-fang}{STFangsong}
-}{\setCJKfamilyfont{proposal-fang}{FandolFang-Regular}}}
+}{\setCJKfamilyfont{proposal-fang}[Extension=.otf]{FandolFang-Regular}}}
 \newcommand{\ProposalKai}{\CJKfamily{proposal-kai}}
 \newcommand{\ProposalFang}{\CJKfamily{proposal-fang}}
 \newcommand{\ProposalHei}{\CJKfamily{proposal-hei}}
@@ -107,7 +113,7 @@
   }{\IfFontExistsTF{Heiti SC}{%
     \setCJKfamilyfont{proposal-hei}{Heiti SC}%
     \typeout{SII heading font: Heiti SC}%
-  }{\setCJKfamilyfont{proposal-hei}{FandolHei-Regular}%
+  }{\setCJKfamilyfont{proposal-hei}[Extension=.otf]{FandolHei-Regular}%
     \typeout{SII heading font: FandolHei-Regular}}}%
   % 重设 normalsize，保证目录、表格等分组结束后仍恢复 20 bp 行距。
   \renewcommand{\normalsize}{%
