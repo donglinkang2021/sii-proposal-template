@@ -12,6 +12,7 @@
 \RequirePackage[breakable,skins]{tcolorbox}
 \RequirePackage{amsmath,amssymb,booktabs,longtable}
 \RequirePackage{caption,subcaption}
+\RequirePackage{fancyhdr,titletoc}
 % 国标著录 + 行内顺序编码；不使用国标样式默认的上标 cite。
 \RequirePackage[backend=biber,style=gb7714-2015,
   sorting=none,sortcites=true]{biblatex}
@@ -51,6 +52,7 @@
 }{\setCJKfamilyfont{proposal-fang}{FandolFang-Regular}}}
 \newcommand{\ProposalKai}{\CJKfamily{proposal-kai}}
 \newcommand{\ProposalFang}{\CJKfamily{proposal-fang}}
+\newcommand{\ProposalHei}{\CJKfamily{proposal-hei}}
 \pagestyle{empty}
 \linespread{1}
 \setlength{\parindent}{2em}
@@ -92,15 +94,81 @@
       \ifdefstrequal{\ProposalType}{\ProposalMode}{}{%
         \PackageError{sii-proposal}{ProposalType conflicts with ProposalMode}{In report layout, leave ProposalType empty or make it match ProposalMode.}}}
     \TemplateBlanksfalse
-    \setcounter{tocdepth}{2}
-    \setcounter{secnumdepth}{2}
-    \ctexset{section={format=\normalfont\bfseries\fontsize{12bp}{15.6bp}\selectfont,
-      name={},number=\arabic{section},aftername=\quad},
-      subsection={format=\normalfont\bfseries\fontsize{12bp}{15.6bp}\selectfont,
-      number=\arabic{section}.\arabic{subsection},aftername=\quad}}
+    \ProposalReportStyle
   \fi
   \hypersetup{pdftitle={上海创智学院博士研究生开题报告},pdfauthor={\StudentName}}
 }
+
+% 正式版独立启用；不改变原始表单的字体、分页或页式。
+\newcommand{\ProposalReportStyle}{%
+  \IfFontExistsTF{SimHei}{%
+    \setCJKfamilyfont{proposal-hei}{SimHei}%
+    \typeout{SII heading font: SimHei}%
+  }{\IfFontExistsTF{Heiti SC}{%
+    \setCJKfamilyfont{proposal-hei}{Heiti SC}%
+    \typeout{SII heading font: Heiti SC}%
+  }{\setCJKfamilyfont{proposal-hei}{FandolHei-Regular}%
+    \typeout{SII heading font: FandolHei-Regular}}}%
+  % 重设 normalsize，保证目录、表格等分组结束后仍恢复 20 bp 行距。
+  \renewcommand{\normalsize}{%
+    \@setfontsize\normalsize{12bp}{20bp}%
+    \setlength{\abovedisplayskip}{10bp}%
+    \setlength{\belowdisplayskip}{10bp}%
+    \setlength{\abovedisplayshortskip}{6bp}%
+    \setlength{\belowdisplayshortskip}{6bp}}%
+  \normalsize
+  \setlength{\parindent}{2em}\setlength{\parskip}{0pt}%
+  \raggedbottom
+  \clubpenalty=10000 \@clubpenalty=10000 \widowpenalty=10000
+  \setcounter{tocdepth}{2}\setcounter{secnumdepth}{3}%
+  % ctex 的 break 键会在连续空标题之间被跳过；入口处清页也覆盖未填正文的章。
+  \AddToHook{cmd/section/before}{\clearpage\@nobreakfalse}%
+  % number 仅影响显示；thesection 和交叉引用仍为阿拉伯数字。
+  \ctexset{
+    section={format=\normalfont\ProposalHei\fontsize{16bp}{24bp}\selectfont\centering,
+      name={第,章},number=\arabic{section},aftername=\quad,
+      break={},beforeskip=6bp,afterskip=18bp,hang=false},
+    subsection={format=\normalfont\ProposalHei\fontsize{14bp}{20bp}\selectfont\raggedright,
+      number=\arabic{section}.\arabic{subsection},aftername=\quad,
+      beforeskip=24bp,afterskip=8bp},
+    subsubsection={format=\normalfont\ProposalHei\fontsize{12bp}{18bp}\selectfont\raggedright,
+      number=\arabic{section}.\arabic{subsection}.\arabic{subsubsection},aftername=\quad,
+      beforeskip=16bp,afterskip=6bp}}%
+  \setlength{\headheight}{14bp}\setlength{\headsep}{6mm}%
+  \setlength{\footskip}{10mm}%
+  \fancypagestyle{proposalreport}{%
+    \fancyhf{}%
+    \fancyhead[C]{\normalfont\fontsize{9bp}{12bp}\selectfont 上海创智学院博士研究生开题报告}%
+    \fancyfoot[C]{\normalfont\fontsize{10.5bp}{14bp}\selectfont\thepage}%
+    \renewcommand{\headrulewidth}{.4pt}%
+    \renewcommand{\footrulewidth}{0pt}}%
+  \pagestyle{proposalreport}%
+  \titlecontents{section}[4em]
+    {\addvspace{6bp}\normalfont\ProposalHei\fontsize{12bp}{18bp}\selectfont}
+    {\contentslabel{4em}}{\hspace*{-4em}}
+    {\titlerule*[.5em]{.}\contentspage}%
+  \titlecontents{subsection}[5em]
+    {\normalfont\fontsize{12bp}{18bp}\selectfont}
+    {\contentslabel{3em}}{\hspace*{-3em}}
+    {\titlerule*[.5em]{.}\contentspage}%
+  \contentsmargin{2.5em}%
+  \DeclareCaptionFont{proposalcaption}{\normalfont\fontsize{11bp}{15bp}\selectfont}%
+  \DeclareCaptionFont{proposalsubcaption}{\normalfont\fontsize{10.5bp}{14bp}\selectfont}%
+  \DeclareCaptionLabelSeparator{proposalspace}{\quad}%
+  \captionsetup{font=proposalcaption,labelsep=proposalspace,skip=6bp}%
+  \captionsetup*[figure]{position=bottom}%
+  \captionsetup*[table]{position=top}%
+  \captionsetup*[sub]{font=proposalsubcaption}%
+  \setlength{\textfloatsep}{12bp plus 2bp minus 2bp}%
+  \setlength{\intextsep}{12bp plus 2bp minus 2bp}%
+  \setlength{\floatsep}{10bp plus 2bp minus 2bp}%
+  \renewcommand{\bibfont}{\normalfont\fontsize{10.5bp}{15bp}\selectfont}%
+  \setlength{\bibitemsep}{4bp}\setlength{\bibparsep}{0pt}%
+}
+\AtBeginEnvironment{table}{\ifProposalReport
+  \fontsize{11bp}{16bp}\selectfont\renewcommand{\arraystretch}{1.1}\fi}
+\AtBeginEnvironment{table*}{\ifProposalReport
+  \fontsize{11bp}{16bp}\selectfont\renewcommand{\arraystretch}{1.1}\fi}
 
 % 用矢量线条绘制勾选框，不依赖 Wingdings 等符号字体。
 \newcommand{\ProposalCheck}[1]{%
@@ -112,6 +180,8 @@
   }\kern.12em}
 \newcommand{\CoverField}[1]{\rule[-3.5mm]{0pt}{9.2mm}#1}
 \newcommand{\makeproposalcover}{%
+  \ifProposalReport\makeproposalreportcover\else\makeproposaltemplatecover\fi}
+\newcommand{\makeproposaltemplatecover}{%
   \begin{titlepage}
   \centering
   \setlength{\parindent}{0pt}
@@ -140,6 +210,35 @@
   \end{tabular}\par
   \vspace{27mm}
   \ProposalYear 年\quad\ProposalMonth 月\quad\ProposalDay 日\par}
+  \end{titlepage}
+}
+
+\newcommand{\ProposalReportCoverField}[1]{\rule[-3.5mm]{0pt}{10.5mm}#1}
+\newcommand{\makeproposalreportcover}{%
+  \begin{titlepage}
+  \centering\setlength{\parindent}{0pt}%
+  \vspace*{-\topskip}%
+  \includegraphics[width=5.5cm,height=5.5cm,keepaspectratio]{figures/sii_logo.pdf}\par
+  \nointerlineskip\vspace{4.5mm}%
+  {\fontsize{26bp}{36bp}\selectfont\bfseries
+    上海创智学院\par\vspace{1mm}博士研究生开题报告\par}%
+  \vspace{10mm}%
+  {\ProposalKai\fontsize{13bp}{18bp}\selectfont
+    \setlength{\tabcolsep}{1.5mm}\setlength{\arrayrulewidth}{.5pt}%
+    \begin{tabular}{@{}>{\raggedright\arraybackslash}m{4.95cm}
+                         >{\centering\arraybackslash}m{8.25cm}@{}}
+      姓名 & \ProposalReportCoverField{\StudentName}\\\cline{2-2}
+      学号 & \ProposalReportCoverField{\StudentID}\\\cline{2-2}
+      开题类型 & \ProposalReportCoverField{\ProposalCheck{thesis}学位论文\quad
+                                            \ProposalCheck{practice}实践成果}\\\cline{2-2}
+      导师组 & {\raggedright
+        \ProposalReportCoverField{组长：\AdvisorLeader}\par
+        \ProposalReportCoverField{组员：\AdvisorMembers}\par}\\\cline{2-2}
+      论文题目/实践成果名称 & \ProposalReportCoverField{\ProposalTitle}\\\cline{2-2}
+      专业/领域 & \ProposalReportCoverField{\MajorField}\\\cline{2-2}
+    \end{tabular}\par
+    \vspace{25mm}%
+    \ProposalYear 年\quad\ProposalMonth 月\quad\ProposalDay 日\par}%
   \end{titlepage}
 }
 
@@ -198,15 +297,20 @@
 \newcommand{\ProposalReportRow}[3]{%
   \rule[-2mm]{0pt}{7.5mm}#1 & #2 & #3\\\hline}
 \newcommand{\ProposalScheduleHead}{%
-  \rule[-2mm]{0pt}{7.5mm}起讫时间 & 主要研究内容 & 预期结果、阶段性成果\\\hline}
+  \rule[-2mm]{0pt}{7.5mm}\ProposalHei 起讫时间 &
+  \ProposalHei 主要研究内容 & \ProposalHei 预期结果、阶段性成果\\\hline}
 \newcounter{proposalprogress}
+\newlength{\ProposalScheduleWidth}
 \newenvironment{proposalreportschedule}{%
-  \par\setlength{\tabcolsep}{2mm}%
+  \par\fontsize{11bp}{16bp}\selectfont\setlength{\tabcolsep}{2mm}%
+  \renewcommand{\arraystretch}{1.1}%
+  \setlength{\LTpre}{12bp}\setlength{\LTpost}{12bp}%
+  \setlength{\ProposalScheduleWidth}{\dimexpr\linewidth-6\tabcolsep-4\arrayrulewidth\relax}%
   % 进度表没有题注，不占用正文中有编号表格的序号。
   \renewcommand{\LTcaptype}{proposalprogress}%
-  \begin{longtable}{|>{\raggedright\arraybackslash}p{.22\linewidth}|
-    >{\raggedright\arraybackslash}p{\dimexpr.35\linewidth-6\tabcolsep-4\arrayrulewidth\relax}|
-    >{\raggedright\arraybackslash}p{.43\linewidth}|}
+  \begin{longtable}{|>{\raggedright\arraybackslash}p{.18\ProposalScheduleWidth}|
+    >{\raggedright\arraybackslash}p{.34\ProposalScheduleWidth}|
+    >{\raggedright\arraybackslash}p{.48\ProposalScheduleWidth}|}
     \hline\ProposalScheduleHead\endfirsthead
     \hline\ProposalScheduleHead\endhead
     \endfoot\endlastfoot
@@ -226,7 +330,7 @@
 
 \newcommand{\makeproposalcontents}{%
   \ifProposalReport
-    \clearpage\pagestyle{plain}\pagenumbering{Roman}%
+    \clearpage\pagestyle{proposalreport}\pagenumbering{Roman}%
     \tableofcontents\clearpage\pagenumbering{arabic}%
   \fi}
 \newcommand{\printproposalbibliography}{%
